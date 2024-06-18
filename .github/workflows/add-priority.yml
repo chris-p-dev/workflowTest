@@ -1,0 +1,60 @@
+name: Set Priority Label
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  add-label:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v2
+
+      - name: Extract JIRA Ticket ID
+        id: extract_ticket_id
+        run: |
+          PR_TITLE=$(jq -r .pull_request.title $GITHUB_EVENT_PATH)
+          if [[ "$PR_TITLE" =~ ([A-Z]+-[0-9]+) ]]; then
+            echo "::set-output name=ticket_id::${BASH_REMATCH[1]}"
+          else
+            echo "No JIRA ticket ID found in the PR title."
+            exit 1
+          fi
+        shell: bash
+
+      - name: Get JIRA Ticket Priority
+        id: get_ticket_priority
+        run: |
+          TICKET_ID=${{ steps.extract_ticket_id.outputs.ticket_id }}
+          RESPONSE=$(curl -s -u ${{ secrets.JIRA_USERNAME }}:${{ secrets.JIRA_API_TOKEN }} \
+                            -H "Accept: application/json" \
+                            ${{ secrets.JIRA_BASE_URL }}/rest/api/2/issue/$TICKET_ID)
+          PRIORITY=$(echo $RESPONSE | jq -r .fields.priority.name)
+          echo "::set-output name=priority::${PRIORITY}"
+        shell: bash
+
+      - name: Set PR Label
+        run: |
+          PRIORITY=${{ steps.get_ticket_priority.outputs.priority }}
+          LABEL=""
+          case $PRIORITY in
+            "High")
+              LABEL="high-priority"
+              ;;
+            "Medium")
+              LABEL="medium-priority"
+              ;;
+            "Low")
+              LABEL="low-priority"
+              ;;
+            *)
+              echo "Unknown priority: $PRIORITY"
+              exit 1
+              ;;
+          esac
+          gh pr edit ${{ github.event.pull_request.number }} --add-label $LABEL
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
