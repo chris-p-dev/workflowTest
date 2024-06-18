@@ -11,6 +11,13 @@ jobs:
     steps:
     - name: Check out the code
       uses: actions/checkout@v2
+    - name: Validate Secrets
+      run: |
+        if [ -z "${{ secrets.BASIC_AUTH_TOKEN }}" ]; then echo "Missing JIRA_USERNAME"; exit 1; fi
+        if [ -z "${{ secrets.JIRA_API_TOKEN }}" ]; then echo "Missing JIRA_API_TOKEN"; exit 1; fi
+        if [ -z "${{ secrets.JIRA_BASE_URL }}" ]; then echo "Missing JIRA_BASE_URL"; exit 1; fi
+        echo "All required secrets are set."
+      shell: bash
 
     - name: Extract JIRA Ticket ID
       id: extract_ticket_id
