@@ -30,7 +30,7 @@ jobs:
       run: |
         TICKET_ID=${{ steps.extract_ticket_id.outputs.ticket_id }}
         RESPONSE=$(curl -s \
-                    -H "Authorization: Bearer ${{ secrets.JIRA_ACCESS_TOKEN }}" \
+                    -H "Authorization: Basic ${{ secrets.BASIC_AUTH_TOKEN }}" \
                     -H "Accept: application/json" \
                     ${{ secrets.JIRA_BASE_URL }}/rest/api/2/issue/$TICKET_ID)
         PRIORITY=$(echo $RESPONSE | jq -r .fields.priority.name)
