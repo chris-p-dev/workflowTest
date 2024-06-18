@@ -3,6 +3,8 @@ name: Add JIRA Priority Label
 on:
   pull_request:
     types: [opened, synchronize]
+env:
+  ENVIRONMENT: JIRA_ACCESS_TOKEN 
 
 jobs:
   add-label:
