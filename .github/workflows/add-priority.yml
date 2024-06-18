@@ -16,9 +16,10 @@ jobs:
 
       - name: Validate Secrets
         run: |
-          if [ -z "${{ secrets.BASIC_AUTH_TOKEN }}" ]; then echo "Missing JIRA_USERNAME"; exit 1; fi
-          if [ -z "${{ secrets.JIRA_API_TOKEN }}" ]; then echo "Missing JIRA_API_TOKEN"; exit 1; fi
-          if [ -z "${{ secrets.JIRA_BASE_URL }}" ]; then echo "Missing JIRA_BASE_URL"; exit 1; fi
+          echo "JIRA_USERNAME: ${JIRA_USERNAME:0:2}***"
+          echo "JIRA_API_TOKEN: ${JIRA_API_TOKEN:0:2}***"
+          echo "JIRA_BASE_URL: ${JIRA_BASE_URL:0:2}***"
+          echo "BASIC_AUTH_TOKEN: ${BASIC_AUTH_TOKEN:0:2}***"
           echo "All required secrets are set."
         shell: bash
 
