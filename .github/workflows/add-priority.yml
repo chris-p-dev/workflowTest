@@ -53,6 +53,7 @@ jobs:
 
       - name: Set PR Label
         run: |
+          echp ${{ env.priority }}
           PRIORITY=${{ env.priority }}
           if [[ "$PRIORITY" == "High" ]]; then
             LABEL="high-priority"
