@@ -38,10 +38,11 @@ jobs:
       - name: Get JIRA Ticket Priority
         id: get_ticket_priority
         run: |
-          TICKET_ID=${{ env.ticket_id }}
-          RESPONSE=$(curl -s -u ${{ secrets.JIRA_USERNAME }}:${{ secrets.JIRA_API_TOKEN }} \
+          TICKET_ID=${{ steps.extract_ticket_id.outputs.ticket_id }}
+          RESPONSE=$(curl -s \
+                      -H "Authorization: Basic ${{ secrets.BASIC_AUTH_TOKEN }}" \
                       -H "Accept: application/json" \
-                      https://${{ secrets.JIRA_BASE_URL }}/rest/api/2/issue/$TICKET_ID)
+                      ${{ secrets.JIRA_BASE_URL }}/rest/api/2/issue/$TICKET_ID)
           echo "JIRA API response: $RESPONSE"
           PRIORITY=$(echo $RESPONSE | jq -r .fields.priority.name)
           if [[ "$PRIORITY" == "null" ]]; then
