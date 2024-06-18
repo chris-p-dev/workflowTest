@@ -26,13 +26,14 @@ jobs:
       - name: Extract JIRA Ticket ID
         id: extract_ticket_id
         run: |
-          PR_BODY=$(jq -r .pull_request.body $GITHUB_EVENT_PATH)
-          FIRST_LINE=$(echo "$PR_BODY" | head -n 1)
-          if [[ "$FIRST_LINE" =~ ([A-Z]+-[0-9]+) ]]; then
-            echo "ticket_id=${BASH_REMATCH[1]}" >> $GITHUB_ENV
+          PRIORITY=${{ env.priority }}
+          LABEL=""
+          if [[ "$PRIORITY" == "High" ]]; then
+            LABEL="high-priority"
+            gh pr edit ${{ github.event.pull_request.number }} --add-label $LABEL
+            echo "Added high-priority label to PR #${{ github.event.pull_request.number }}"
           else
-            echo "No JIRA ticket ID found in the PR body."
-            exit 1
+            echo "No label added because priority is not High."
           fi
         shell: bash
 
