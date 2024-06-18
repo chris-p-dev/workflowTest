@@ -48,24 +48,15 @@ jobs:
 
     - name: Set PR Label
       run: |
-        PRIORITY=${{ steps.get_ticket_priority.outputs.priority }}
+        PRIORITY=${{ env.priority }}
         LABEL=""
-        case $PRIORITY in
-          "High")
-            LABEL="high-priority"
-            ;;
-          "Medium")
-            LABEL="medium-priority"
-            ;;
-          "Low")
-            LABEL="low-priority"
-            ;;
-          *)
-            echo "Unknown priority: $PRIORITY"
-            exit 1
-            ;;
-        esac
-        gh pr edit ${{ github.event.pull_request.number }} --add-label $LABEL
+        if [[ "$PRIORITY" == "High" ]]; then
+          LABEL="high-priority"
+          gh pr edit ${{ github.event.pull_request.number }} --add-label $LABEL
+          echo "Added high-priority label to PR #${{ github.event.pull_request.number }}"
+        else
+          echo "No label added because priority is not High."
+        fi
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       shell: bash
