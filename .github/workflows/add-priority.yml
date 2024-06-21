@@ -45,6 +45,7 @@ jobs:
                       -H "Accept: application/json" \
                       ${{ secrets.JIRA_BASE_URL }}/rest/api/2/issue/$TICKET_ID)
           echo "JIRA API response: $RESPONSE"
+
           PRIORITY=$(echo $RESPONSE | jq -r .fields.priority.name)
           if [[ "$PRIORITY" == "null" ]]; then
             echo "Error fetching JIRA ticket priority. Response: $RESPONSE"
@@ -55,14 +56,27 @@ jobs:
 
       - name: Set PR Label
         run: |
-          echo ${{ env.priority }}
           PRIORITY=${{ env.priority }}
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          LABEL="high-priority"
+
+          # Fetch current labels on the PR
+          LABELS=$(gh pr view $PR_NUMBER --json labels --jq '.labels[].name')
+
           if [[ "$PRIORITY" == "High" ]]; then
-            LABEL="high-priority"
-            gh pr edit ${{ github.event.pull_request.number }} --add-label $LABEL
-            echo "Added high-priority label to PR #${{ github.event.pull_request.number }}"
+            if [[ "$LABELS" != *"$LABEL"* ]]; then
+              gh pr edit $PR_NUMBER --add-label $LABEL
+              echo "Added high-priority label to PR #$PR_NUMBER"
+            else
+              echo "PR #$PR_NUMBER already has the high-priority label"
+            fi
           else
-            echo "No label added because priority is not High."
+            if [[ "$LABELS" == *"$LABEL"* ]]; then
+              gh pr edit $PR_NUMBER --remove-label $LABEL
+              echo "Removed high-priority label from PR #$PR_NUMBER"
+            else
+              echo "PR #$PR_NUMBER does not have the high-priority label"
+            fi
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
