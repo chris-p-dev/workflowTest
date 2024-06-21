@@ -54,39 +54,29 @@ jobs:
           echo "priority=${PRIORITY}" >> $GITHUB_ENV
         shell: bash
 
-      - name: Add Priority Urgent Label
-        if: env.priority == 'High' || env.priority == 'Blocker'
+      - name: Set PR Label
         run: |
+          PRIORITY=${{ env.priority }}
           PR_NUMBER=${{ github.event.pull_request.number }}
           LABEL="Priority: Urgent"
 
           # Fetch current labels on the PR
           LABELS=$(gh pr view $PR_NUMBER --json labels --jq '.labels[].name')
 
-          if [[ "$LABELS" != *"$LABEL"* ]]; then
-            gh pr edit $PR_NUMBER --add-label $LABEL
-            echo "Added $LABEL label to PR #$PR_NUMBER"
+          if [[ "$PRIORITY" == "High" || "$PRIORITY" == "Blocker" ]]; then
+            if [[ "$LABELS" != *"$LABEL"* ]]; then
+              gh pr edit $PR_NUMBER --add-label $LABEL
+              echo "Added Priority: Urgent label to PR #$PR_NUMBER"
+            else
+              echo "PR #$PR_NUMBER already has the Priority: Urgent label"
+            fi
           else
-            echo "PR #$PR_NUMBER already has the $LABEL label"
-          fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        shell: bash
-
-      - name: Remove Priority Urgent Label
-        if: env.priority != 'High' && env.priority != 'Blocker'
-        run: |
-          PR_NUMBER=${{ github.event.pull_request.number }}
-          LABEL="Priority: Urgent"
-
-          # Fetch current labels on the PR
-          LABELS=$(gh pr view $PR_NUMBER --json labels --jq '.labels[].name')
-
-          if [[ "$LABELS" == *"$LABEL"* ]]; then
-            gh pr edit $PR_NUMBER --remove-label $LABEL
-            echo "Removed $LABEL label from PR #$PR_NUMBER"
-          else
-            echo "PR #$PR_NUMBER does not have the $LABEL label"
+            if [[ "$LABELS" == *"$LABEL"* ]]; then
+              gh pr edit $PR_NUMBER --remove-label $LABEL
+              echo "Removed Priority: Urgent label from PR #$PR_NUMBER"
+            else
+              echo "PR #$PR_NUMBER does not have the Priority: Urgent label"
+            fi
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
