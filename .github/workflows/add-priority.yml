@@ -65,14 +65,14 @@ jobs:
 
           if [[ "$PRIORITY" == "High" || "$PRIORITY" == "Blocker" ]]; then
             if [[ "$LABELS" != *"$LABEL"* ]]; then
-              gh pr edit $PR_NUMBER --add-label $LABEL
+              gh pr edit $PR_NUMBER --add-label "$LABEL"
               echo "Added Priority: Urgent label to PR #$PR_NUMBER"
             else
               echo "PR #$PR_NUMBER already has the Priority: Urgent label"
             fi
           else
             if [[ "$LABELS" == *"$LABEL"* ]]; then
-              gh pr edit $PR_NUMBER --remove-label $LABEL
+              gh pr edit $PR_NUMBER --remove-label "$LABEL"
               echo "Removed Priority: Urgent label from PR #$PR_NUMBER"
             else
               echo "PR #$PR_NUMBER does not have the Priority: Urgent label"
