@@ -58,24 +58,24 @@ jobs:
         run: |
           PRIORITY=${{ env.priority }}
           PR_NUMBER=${{ github.event.pull_request.number }}
-          LABEL="high-priority"
+          LABEL="Priority: Urgent"
 
           # Fetch current labels on the PR
           LABELS=$(gh pr view $PR_NUMBER --json labels --jq '.labels[].name')
 
-          if [[ "$PRIORITY" == "High" ]]; then
+          if [[ "$PRIORITY" == "High" || "$PRIORITY" == "Blocker" ]]; then
             if [[ "$LABELS" != *"$LABEL"* ]]; then
               gh pr edit $PR_NUMBER --add-label $LABEL
-              echo "Added high-priority label to PR #$PR_NUMBER"
+              echo "Added $LABEL label to PR #$PR_NUMBER"
             else
-              echo "PR #$PR_NUMBER already has the high-priority label"
+              echo "PR #$PR_NUMBER already has the $LABEL label"
             fi
           else
             if [[ "$LABELS" == *"$LABEL"* ]]; then
               gh pr edit $PR_NUMBER --remove-label $LABEL
-              echo "Removed high-priority label from PR #$PR_NUMBER"
+              echo "Removed $LABEL label from PR #$PR_NUMBER"
             else
-              echo "PR #$PR_NUMBER does not have the high-priority label"
+              echo "PR #$PR_NUMBER does not have the $LABEL label"
             fi
           fi
         env:
